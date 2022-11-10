@@ -1,0 +1,21 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: triton-inference-server-hpa
+  labels:
+    app: triton-inference-server-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: triton-inference-server
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: External
+      external:
+        metric:
+          name: kubernetes.io|container|accelerator|duty_cycle
+        target:
+          type: AverageValue
+          averageValue: "80"

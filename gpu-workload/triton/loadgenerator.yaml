@@ -1,0 +1,186 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loadgenerator-files
+data:
+  locustfile.py: |
+    # Copyright (c) 2021, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+    #
+    # Redistribution and use in source and binary forms, with or without
+    # modification, are permitted provided that the following conditions
+    # are met:
+    #  * Redistributions of source code must retain the above copyright
+    #    notice, this list of conditions and the following disclaimer.
+    #  * Redistributions in binary form must reproduce the above copyright
+    #    notice, this list of conditions and the following disclaimer in the
+    #    documentation and/or other materials provided with the distribution.
+    #  * Neither the name of NVIDIA CORPORATION nor the names of its
+    #    contributors may be used to endorse or promote products derived
+    #    from this software without specific prior written permission.
+    #
+    # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ``AS IS'' AND ANY
+    # EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+    # PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+    # CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+    # EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+    # PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+    # PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+    # OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+    # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+    from locust import FastHttpUser, task, between
+    from locust import LoadTestShape
+    import json
+    import os
+
+
+    class ProfileLoad(LoadTestShape):
+        '''
+        This load profile starts at 0 and steps up by step_users
+        increments every tick, up to target_users. After reaching
+        target_user level, load will stay at target_user level
+        until time_limit is reached.
+        '''
+
+        target_users = 1000
+        step_users = 50  # ramp users each step
+        time_limit = 3600  # seconds
+
+        def tick(self):
+            num_steps = self.target_users / self.step_users
+            run_time = round(self.get_run_time())
+
+            if run_time < self.time_limit:
+                if num_steps < run_time:
+                    user_count = num_steps * self.step_users
+                else:
+                    user_count = self.target_users
+                return (user_count, self.step_users)
+            else:
+                return None
+
+
+    class TritonUser(FastHttpUser):
+        wait_time = between(0.2, 0.2)
+
+        @task()
+        def bert(self):
+            with self.client.post(self.infer_url,
+                                  catch_response=True, data=json.dumps(self.data)
+                                  ) as response:
+                if response.status_code == 200:
+                    response.success()
+                else:
+                    response.failure(f'{response.status_code} {response.reason}')
+
+        def on_start(self):
+            with open('request.json') as f:
+                self.data = json.load(f)
+
+            model_name = os.getenv('MODEL_NAME', 'bert_tf')
+
+            self.infer_url = f'{self.environment.host}/v2/models/{model_name}/infer'
+
+  request.json: |
+    {
+      "inputs": [{
+        "name": "input_word_ids",
+        "shape": [1, 128],
+        "datatype": "INT32",
+        "parameters": {},
+        "data": [101, 2054, 2003, 23435, 5339, 1029, 102, 23435, 5339, 2003, 1037, 2152, 2836, 2784, 4083, 28937, 4132, 2008, 18058, 2659, 2397, 9407, 1998, 2152, 2083, 18780, 2005, 18726, 2107, 2004, 16755, 2545, 1010, 4613, 1998, 3746, 1013, 2678, 2006, 1050, 17258, 2401, 14246, 2271, 1012, 2009, 2950, 11968, 8043, 2015, 2000, 12324, 4275, 1010, 1998, 13354, 7076, 2000, 2490, 3117, 23092, 1998, 9014, 2077, 11243, 20600, 2015, 2005, 28937, 1012, 2651, 1050, 17258, 2401, 2003, 2330, 1011, 14768, 6129, 11968, 8043, 2015, 1998, 13354, 7076, 1999, 23435, 5339, 2061, 2008, 1996, 2784, 4083, 2451, 2064, 7661, 4697, 1998, 7949, 2122, 6177, 2000, 2202, 5056, 1997, 3928, 23435, 5339, 20600, 2015, 2005, 2115, 18726, 1012, 102, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }, {
+        "name": "input_mask",
+        "shape": [1, 128],
+        "datatype": "INT32",
+        "parameters": {},
+        "data": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }, {
+        "name": "input_type_ids",
+        "shape": [1, 128],
+        "datatype": "INT32",
+        "parameters": {},
+        "data": [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      }],
+      "outputs": [{
+        "name": "bert_encoder",
+        "parameters": {
+          "binary_data": false
+        }
+      }]
+    }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: loadgenerator-env
+data:
+  LOCUST_HOST: http://34.95.73.112
+  LOCUST_USERS: "100"
+  LOCUST_SPAWN_RATE: "5"
+  LOCUST_LOGLEVEL: error
+  LOCUST_WEB_PORT: "8080"
+  MODEL_NAME: "bert_tf"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loadgenerator
+  labels:
+    app: loadgenerator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loadgenerator
+  template:
+    metadata:
+      labels:
+        app: loadgenerator
+    spec:
+      volumes:
+        - name: locustfile
+          configMap:
+            name: loadgenerator-files
+      containers:
+        - name: loadgenerator
+          image: locustio/locust
+          command: ["locust", "--autostart"]
+          envFrom:
+            - configMapRef:
+                name: loadgenerator-env
+          volumeMounts:
+            - mountPath: /home/locust
+              name: locustfile
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+              ephemeral-storage: "1Gi"
+            limits:
+              memory: "512Mi"
+              cpu: "250m"
+              ephemeral-storage: "1Gi"
+          readinessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 8080
+          ports:
+            - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadgenerator
+spec:
+  type: ClusterIP
+  selector:
+    app: loadgenerator
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
