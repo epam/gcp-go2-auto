@@ -118,7 +118,7 @@ kind: ConfigMap
 metadata:
   name: loadgenerator-env
 data:
-  LOCUST_HOST: http://34.95.73.112
+  LOCUST_HOST: http://TRITON_IP_ADDRESS
   LOCUST_USERS: "100"
   LOCUST_SPAWN_RATE: "5"
   LOCUST_LOGLEVEL: error

@@ -33,12 +33,6 @@ gcloud container clusters create-auto "$GKE_NAME" \
     --region="$LOCATION" \
     --release-channel="rapid" \
     --cluster-version="1.24.5-gke.600"
-
-gcloud beta container clusters update "$GKE_NAME" \
-    --region="$LOCATION" \
-    --disable-managed-prometheus
-
-kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user "$(gcloud config get-value account)"
 ```
 
 Execution of these commands take some time.
@@ -71,7 +65,7 @@ kubectl annotate serviceaccount "default" "iam.gke.io/gcp-service-account=$GSA_E
 
 # Triron inference server works only with GOOGLE_APPLICATION_CREDENTIALS file
 gcloud iam service-accounts keys create key.json --iam-account "$GSA_EMAIL"
-kubectl create secret generic "$GSA_NAME" --from-file=key.json=key.json
+kubectl create secret generic "triton-inference-server" --from-file=key.json=key.json
 
 # HPA setup
 gcloud projects add-iam-policy-binding \
@@ -109,13 +103,20 @@ kubectl apply -f hpa.yaml
 To get IP address of Triton server
 
 ```bash
-kubectl get ingress triton-inference-server -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+LB_IP=$(kubectl get ingress triton-inference-server -o=jsonpath='{.status.loadBalancer.ingress[0].ip}')
+echo $LB_IP
+sed -i "s/TRITON_IP_ADDRESS/$LB_IP/g" "loadgenerator.yaml"
 ```
 
-Edit `loadgenerator.yaml` and replace `<triton-ip-address>` with IP address of triton server
+Deploy load generator
 
 ```bash
 kubectl apply -f loadgenerator.yaml
+```
+
+When pod with load generator will be ready
+
+```bash
 kubectl port-forward "svc/loadgenerator" 8080
 ```
 
@@ -125,20 +126,10 @@ The load generator has auto-start enabled by default. You should be able to obse
 ## Clean up
 
 ```bash
-# Delete GKE cluster
+# Delete GKE workload
 kubectl delete -f loadgenerator.yaml -f triton.yaml -f hpa.yaml
-gcloud container clusters delete "triton" --region="$LOCATION"
 
-# Cleanup GSA
-gcloud projects remove-iam-policy-binding \
-    $GOOGLE_CLOUD_PROJECT \
-    --member="serviceAccount:$GSA_EMAIL" \
-    --role="storage.admin"
-
-gcloud projects remove-iam-policy-binding \
-    $GOOGLE_CLOUD_PROJECT \
-    --member="serviceAccount:$GSA_EMAIL" \
-    --role="roles/monitoring.viewer"
-
+# Cleanup GCP
 gcloud iam service-accounts delete "$GSA_EMAIL" --quiet
+gcloud container clusters delete "triton" --region="$LOCATION" --quiet
 ```
