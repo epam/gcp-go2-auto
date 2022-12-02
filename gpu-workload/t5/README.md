@@ -2,7 +2,7 @@
 
 Stanza for model packaging and serving for T5 models.
 
-## Convert Model
+## Package Model
 
 ```bash
 export MODEL_NAME='t5-small'
