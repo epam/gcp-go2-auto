@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import logging
-from fast_dash import fastdash, FastDash
+from fast_dash import FastDash
+from transformers import T5Tokenizer, AutoTokenizer
+# import transformers
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +16,6 @@ app = FastDash(
   update_live=False,
 )
 
-if __name__ == "__main__":
-  logger.info(f"Transformers version {transformers.__version__}")
-  app.run_server(debug=True, port=8050)
+# if __name__ == "__main__":
+  # logger.info(f"Transformers version {transformers.__version__}")
+  # app.run_server(debug=True, port=8050)

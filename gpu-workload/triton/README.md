@@ -4,7 +4,7 @@ This tutorial show how to run GPU workload on GKE Autopilot. As example of GPU w
 
 Tutorial works in GCP CloudShell environment.
 
-## Prepare model regestry for Triton Inference Server
+## Prepare model registry for Triton Inference Server
 
 Download and organize model artifacts as per Triton model repository spec
 
@@ -24,16 +24,17 @@ gsutil -m cp -r "$MODEL_DIR" "gs://$BUCKET_NAME/"
 
 ## Create GKE Autopilot
 
-Use version of GKE >= 1.24 to be able to run GPU workload
+Use version of GKE >= `1.24.2-gke.1800` to be able to run GPU workload
 
 ```bash
 GKE_NAME="triton"
-
 gcloud container clusters create-auto "$GKE_NAME" \
     --region="$LOCATION" \
     --release-channel="rapid" \
-    --cluster-version="1.24.5-gke.600"
+    --cluster-version="1.24.7-gke.900"
 ```
+
+> To find out valid versions for rapid releas echannel use: `gcloud container get-server-config --region="$LOCATION" --flatten="channels" --filter="channels.channel=RAPID" --format="yaml(channels.channel,channels.validVersions)"`. See more details [here](https://cloud.google.com/kubernetes-engine/versioning)
 
 Execution of these commands take some time.
 
@@ -63,7 +64,7 @@ gcloud iam service-accounts add-iam-policy-binding \
 
 kubectl annotate serviceaccount "default" "iam.gke.io/gcp-service-account=$GSA_EMAIL"
 
-# Triron inference server works only with GOOGLE_APPLICATION_CREDENTIALS file
+# Triton inference server works only with GOOGLE_APPLICATION_CREDENTIALS file
 gcloud iam service-accounts keys create key.json --iam-account "$GSA_EMAIL"
 kubectl create secret generic "triton-inference-server" --from-file=key.json=key.json
 

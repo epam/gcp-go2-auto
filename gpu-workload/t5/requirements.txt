@@ -9,3 +9,7 @@ torch-model-archiver
 torch-workflow-archiver
 transformers
 # nvgpu
+pytorch_lightning
+tokenizers
+sentencepiece
+torchserve-dashboard

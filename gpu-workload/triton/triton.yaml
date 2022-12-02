@@ -46,10 +46,10 @@ spec:
               value: /var/secrets/google/key.json
           command: ["tritonserver"]
           args:
-            - "--model-store=gs://triton-models-repo"
+            - "--model-store=gs://akranga-models/models/"
             - "--log-verbose=0"
             - "--allow-gpu-metrics=True"
-          ports:
+          ports: 
             - containerPort: 8000
               name: http
             - containerPort: 8001
@@ -98,21 +98,21 @@ spec:
       targetPort: metrics
   selector:
     app: triton-inference-server
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: triton-inference-server
-  annotations:
-    kubernetes.io/ingress.class: gce
-spec:
-  rules:
-    - http:
-        paths:
-          - path: /*
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: triton-inference-server
-                port:
-                  number: 8000
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: triton-inference-server
+#   annotations:
+#     kubernetes.io/ingress.class: gce
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /*
+#             pathType: ImplementationSpecific
+#             backend:
+#               service:
+#                 name: triton-inference-server
+#                 port:
+#                   number: 8000
