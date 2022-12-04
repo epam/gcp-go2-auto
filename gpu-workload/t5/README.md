@@ -25,17 +25,23 @@ torch-model-archiver \
 ## Storing model in GCR
 
 ```bash
+export MACHINE="cpu"
 gcloud components install docker-credential-gcr
 docker-credential-gcr configure-docker
 docker-credential-gcr gcr-login
 docker build \
+  --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
   --build-arg MODEL_NAME \
   --build-arg MODEL_VERSION \
-  -t "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION" \
+  -t "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE" \
   -f 'Dockerfile.torch' .
+docker push "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
+
+# verify
+docker run --rm -it -p '8080:8080'  "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
 ```
 
-## Serving
+## Serving 
 
 ```bash
 export TS_CONFIG_FILE="config.properties"

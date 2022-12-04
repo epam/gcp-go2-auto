@@ -7,5 +7,5 @@ torchserve
 torch-model-archiver
 torch-workflow-archiver
 # nvgpu
-pytorch_lightning
-tokenizers
+# pytorch_lightning
+# tokenizers
