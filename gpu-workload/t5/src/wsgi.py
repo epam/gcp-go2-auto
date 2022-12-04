@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from main import app
+from app import app
 
 server = app.app.server

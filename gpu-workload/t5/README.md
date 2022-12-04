@@ -22,6 +22,19 @@ torch-model-archiver \
   -r 'requirements.txt' -f
 ```
 
+## Storing model in GCR
+
+```bash
+gcloud components install docker-credential-gcr
+docker-credential-gcr configure-docker
+docker-credential-gcr gcr-login
+docker build \
+  --build-arg MODEL_NAME \
+  --build-arg MODEL_VERSION \
+  -t "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION" \
+  -f 'Dockerfile.torch' .
+```
+
 ## Serving
 
 ```bash

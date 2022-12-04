@@ -4,3 +4,4 @@ t5-small
 .vscode
 __pycache__
 
+*.mar

@@ -1,15 +1,11 @@
 fast-dash
 gunicorn
-t5
 # huggingface cli to download model
 # huggingface_hub
 # tensorflow-text
 torchserve
 torch-model-archiver
 torch-workflow-archiver
-transformers
 # nvgpu
 pytorch_lightning
 tokenizers
-sentencepiece
-torchserve-dashboard
