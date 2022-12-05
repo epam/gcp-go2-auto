@@ -1,0 +1,130 @@
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: frontend-uptime
+  labels:
+    app.kubernetes.io/name: frontend-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [frontend:8080]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: userservice-uptime
+  labels:
+    app.kubernetes.io/name: userservice-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [userservice:8080/ready]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: balancereader-uptime
+  labels:
+    app.kubernetes.io/name: balancereader-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [balancereader:8080/ready]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: contacts-uptime
+  labels:
+    app.kubernetes.io/name: contacts-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [contacts:8080/ready]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: ledgerwriter-uptime
+  labels:
+    app.kubernetes.io/name: ledgerwriter-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [ledgerwriter:8080/ready]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: transactionhistory-uptime
+  labels:
+    app.kubernetes.io/name: transactionhistory-uptime
+spec:
+  selector:
+    matchLabels:
+      app: blackbox
+  endpoints:
+  - port: metrics
+    path: /probe
+    params:
+      target: [transactionhistory:8080/ready]
+      module: [http_2xx]
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: pgpool-name
+  labels:
+    app.kubernetes.io/name: pgpool-labels
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: pgpool
+      app.kubernetes.io/instance: accounts-db
+  endpoints:
+  - port: metrics
+    interval: 30s
+---
