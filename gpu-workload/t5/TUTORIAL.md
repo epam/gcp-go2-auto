@@ -155,10 +155,22 @@ As the packaged model can be quite large it is recommended to use a container re
 
 ## Deploy model to Kubernetes
 
-Lorem ipsum... (TODO)
+Kubernetes deployment manifests can be found in the `./kubernetes` directory.
+
+Modify the `./kubernetes/serving-*.yaml` files to use the image you just pushed to GCR.
 
 ```bash
-# TODO
+kubectl apply -f kubernetes/serving-gpu.yaml
+# or for CPU serving 
+kubectl apply -f kubernetes/serving-cpu.yaml
+```
+
+To validate successful deployment run the following command:
+
+```bash
+kubectl port-forward "svc/torchserve" 8080
+# you may need different terminal window
+curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test sentence", "from": "en", "to": "es"}' "http://localhost:8080/predictions/$MODEL_NAME/$MODEL_VERSION"
 ```
 
 ### Access deployed model with the application
@@ -174,21 +186,10 @@ docker push "gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
 
 2. Deploy application to Kubernetes
 
-Kubernetes deployment manifests can be found in the `./kubernetes` directory.
-
-Modify the `./kubernetes/serving-*.yaml` files to use the image you just pushed to GCR.
+Lorem ipsum... (TODO)
 
 ```bash
-kubectl apply -f kubernetes/serving-gpu.yaml
-# or for CPU serving 
-kubectl apply -f kubernetes/serving-cpu.yaml
-```
-
-To validate successful deployment run the following command:
-
-```bash
-kubectl port-forward "svc/torchserve" 8080
-curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test sentence", "from": "en", "to": "es"}' "http://localhost:8080/predictions/$MODEL_NAME/$MODEL_VERSION"
+# TODO
 ```
 
 3. Access deployed application with your browser
