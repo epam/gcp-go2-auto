@@ -22,6 +22,12 @@ There are several pre-trained versions available in the hugging face repository.
 * [`t5-large`](https://huggingface.co/t5-large): 770M parameters (3GB download)
 * [`t5-3b`](https://huggingface.co/t5-3b): 2.7B parameters (11GB download)
 
+Latest update [v1.1](https://github.com/google-research/text-to-text-transfer-transformer/blob/main/released_checkpoints.md#t511) of the model was released on 2021-03-25
+
+* [`t5-v1_1-small`](https://huggingface.co/google/t5-v1_1-small): 220M parameters, update on t5 model (3GB download)
+* [`t5-v1_1-base`](https://huggingface.co/google/t5-v1_1-base): 220M parameters, update on t5 model (3GB download)
+* [`t5-v1_1-large`](https://huggingface.co/google/t5-v1_1-large): 220M parameters, update on t5 model (3GB download)
+
 Other T5 model checkpoints you can find [here](https://huggingface.co/models?filter=t5)
 
 ## Before you begin
@@ -141,9 +147,9 @@ docker build \
 docker push  "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE" 
 ```
 
-> Note: if you want to use CPU instead, change `MACHINE` variable to `cpu`
-
 > Depending on chosen model this operation can take some significant time
+
+As you probably can see there are different base image for CPU and GPU. If you want to use CPU you then change `MACHINE` variable to `cpu`.
 
 As the packaged model can be quite large it is recommended to use a container registry endpoint from the same location where you have deployed your GKE Autopilot Cluster. In this tutorial we will use `gcr.io` for US region. You can find the list of available regions [here](https://cloud.google.com/container-registry/docs/pushing-and-pulling#tag)
 
@@ -208,8 +214,9 @@ For troubleshooting GKE Autopilot, refer to [Troubleshooting Autopilot clusters]
 
 ## TODOs
 
-* [ ] Check newer versions of the model T5X and T5_v1.1
+* [x] Check newer versions of the model T5X and T5_v1.1
 * [ ] Check on potential Triton serving instead of TorchServe
+* [ ] Check on potential Tensorflow serving instead of TorchServe
 * [ ] Check on potential closed book questioning variant
 * [ ] Check on potential prometheus integration
 * [ ] Check on potential tensorboard integration
