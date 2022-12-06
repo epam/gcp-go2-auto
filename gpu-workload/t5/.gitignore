@@ -1,3 +1,5 @@
-models/
-/model_store
+model/t5-*/
+/model-store
+!model-store/.gitkeep
 /logs
+*.mar

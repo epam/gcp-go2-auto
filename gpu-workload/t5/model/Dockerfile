@@ -1,17 +1,21 @@
 ARG BASE_IMAGE=pytorch/torchserve:latest-cpu
+
+FROM alpine/git
+
+ARG MODEL_NAME=t5-small
+ARG MODEL_REPO=https://huggingface.co/${MODEL_NAME}
+RUN git clone "${MODEL_REPO}" /model
+
 FROM ${BASE_IMAGE}
 
 ARG MODEL_NAME=t5-small
 ARG MODEL_VERSION=1.0
 
-COPY ./src/handler.py \
-     ./src/model.py \
-     ./models/${MODEL_NAME}/config.json \
-     ./models/${MODEL_NAME}/spiece.model \
-     ./models/${MODEL_NAME}/tokenizer.json \
-     ./models/${MODEL_NAME}/pytorch_model.bin \
-     ./requirements-t5.txt \
-     ./setup_config.json /home/model-server/
+COPY --from=0 /model/. /home/model-server/
+COPY handler.py \
+     model.py \
+     requirements.txt \
+     setup_config.json /home/model-server/
 
 RUN  mkdir -p model-store && \
      torch-model-archiver \
@@ -23,14 +27,12 @@ RUN  mkdir -p model-store && \
      --extra-files "config.json,spiece.model,tokenizer.json,setup_config.json" \
      --runtime 'python3' \
      --export-path "model-store" \
-     -r "requirements-t5.txt"
+     -r "requirements.txt"
 
 FROM ${BASE_IMAGE}
-
-COPY --from=0 /home/model-server/model-store/ /home/model-server/model-store
-COPY ./requirements-t5.txt /home/model-server/requirements.txt
-COPY ./setup_config.json /home/model-server/
-
+# for pip install
 ENV PATH /home/model-server/.local/bin:$PATH
+
+COPY --from=1 /home/model-server/model-store/ /home/model-server/model-store
 
 VOLUME [ "/home/model-server/model-store/" ]
