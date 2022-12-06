@@ -5,21 +5,20 @@ Stanza for model packaging and serving for T5 models.
 ## Package Model
 
 ```bash
-export MODEL_NAME='t5-small'
+export MODEL_NAME='t5-base'
 export MODEL_DIR="models/$MODEL_NAME"
 export MODEL_VERSION="1.0"
 
-mkdir -p "model_store"
-torch-model-archiver \
+mkdir -p "model-store"
+torch-model-archiver --force \
   --model-name "$MODEL_NAME" \
   --version "$MODEL_VERSION" \
-  --model-file './src/model.py' \
+  --model-file './model/model.py' \
   --serialized-file "$MODEL_DIR/pytorch_model.bin" \
-  --handler './src/handler.py' \
-  --extra-files "$MODEL_DIR/config.json,$MODEL_DIR/spiece.model,$MODEL_DIR/tokenizer.json,setup_config.json" \
+  --handler './model/handler.py' \
+  --extra-files "$MODEL_DIR/config.json,$MODEL_DIR/spiece.model,$MODEL_DIR/tokenizer.json,./model/setup_config.json" \
   --runtime 'python3' \
-  --export-path "model_store" \
-  -r 'requirements.txt' -f
+  --export-path "model-store" -r ./model/requirements.txt
 ```
 
 ## Storing model in GCR

@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: torchserve
+  labels:
+    app: torchserve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: torchserve
+  template:
+    metadata:
+      labels:
+        app: torchserve
+    spec:
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-tesla-t4
+      containers:
+        - name: main
+          image: gcr.io/nvidia-ngc-public/tritonserver:22.09-py3
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "2000m"
+              memory: 7Gi
+              ephemeral-storage: 10Gi
+            requests:
+              nvidia.com/gpu: "1"
+              cpu: "2000m"
+              memory: 7Gi
+              ephemeral-storage: 10Gi
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 8081
+              name: grpc
+            - containerPort: 8082
+              name: metrics
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 32
+            periodSeconds: 8
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 60
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: torchserve
+  labels:
+    app: torchserve
+spec:
+  type: ClusterIP
+  selector:
+    app: torchserve
+  ports:
+    - port: 8080
+      name: http
+      targetPort: http
+    - port: 8081
+      name: grpc
+      targetPort: grpc
+    - port: 8082
+      name: metrics
+      targetPort: metrics

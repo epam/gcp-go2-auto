@@ -176,8 +176,19 @@ docker push "gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
 
 Kubernetes deployment manifests can be found in the `./kubernetes` directory.
 
+Modify the `./kubernetes/serving-*.yaml` files to use the image you just pushed to GCR.
+
 ```bash
-# TODO
+kubectl apply -f kubernetes/serving-gpu.yaml
+# or for CPU serving 
+kubectl apply -f kubernetes/serving-cpu.yaml
+```
+
+To validate successful deployment run the following command:
+
+```bash
+kubectl port-forward "svc/torchserve" 8080
+curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test sentence", "from": "en", "to": "es"}' "http://localhost:8080/predictions/$MODEL_NAME/$MODEL_VERSION"
 ```
 
 3. Access deployed application with your browser
