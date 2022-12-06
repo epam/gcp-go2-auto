@@ -128,8 +128,6 @@ File Dockerfile.torch serves as a template for building the Docker image. It con
 
 The first stage is used to download the model artifacts from the Hugging Face repository. The second stage is used to package model with PyTorch Serving Archive tool ([torch-model-archiver](https://github.com/pytorch/serve/tree/master/model-archiver)). It will create a model archive (MAR) file that will be used by the inference server to load the model. The third stage is used to build the final image with PyTorch Serve that will be used to deploy the model to Kubernetes.
 
-> You can see more details about the Dockerfile in the comments in the file `Dockerfile.torch`.
-
 ```bash
 export MODEL_VERSION='1.0'
 export MACHINE='gpu'
@@ -144,6 +142,8 @@ docker push  "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MA
 ```
 
 > Note: if you want to use CPU instead, change `MACHINE` variable to `cpu`
+
+> Depending on chosen model this operation can take some significant time
 
 As the packaged model can be quite large it is recommended to use a container registry endpoint from the same location where you have deployed your GKE Autopilot Cluster. In this tutorial we will use `gcr.io` for US region. You can find the list of available regions [here](https://cloud.google.com/container-registry/docs/pushing-and-pulling#tag)
 
@@ -168,7 +168,7 @@ docker push "gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
 
 2. Deploy application to Kubernetes
 
-Lorem ipsum... (TODO)
+Kubernetes deployment manifests can be found in the `./kubernetes` directory.
 
 ```bash
 # TODO
@@ -179,6 +179,26 @@ Lorem ipsum... (TODO)
 Lorem ipsum... (TODO)
 
 ## Troubleshooting
+
+Here are some common issues you may encounter when deploying the model to GKE Cluster.
+
+### Git LFS
+
+If after cloning the model repository you do not see files stored as LFS objects. 
+
+```bash
+cd model/$MODEL_NAME
+git lfs env
+
+# optionally install git-lfs
+# git lfs install
+
+git lfs pull
+```
+
+> You can find more information about Git LFS [here](https://git-lfs.github.com/)
+
+### GKE Autopilot
 
 For troubleshooting GKE Autopilot, refer to [Troubleshooting Autopilot clusters](https://cloud.google.com/kubernetes-engine/docs/troubleshooting/troubleshooting-autopilot-clusters).
 

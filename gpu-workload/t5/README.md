@@ -34,14 +34,13 @@ docker build \
   --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
   --build-arg MODEL_NAME \
   --build-arg MODEL_VERSION \
-  --build-arg MACHINE \
   --tag "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE" .
 docker push "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
 ```
 
 Verify model
 
-```
+```bash
 docker run --rm -it -p '8080:8080'  "eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
 ```
 
@@ -52,8 +51,7 @@ export TS_CONFIG_FILE="config.properties"
 
 torchserve --foreground
 # or to start in background
-torchserve --start
-torchserve-dashboard --server.port '8105'
+torchserve --start 
 ```
 
 > Now, with your browser open: http://localhost:8105
