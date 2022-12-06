@@ -206,3 +206,10 @@ For troubleshooting GKE Autopilot, refer to [Troubleshooting Autopilot clusters]
 
 * About GKE Autopilot: [Learn more](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
 
+## TODOs
+
+* [ ] Check newer versions of the model T5X and T5_v1.1
+* [ ] Check on potential Triton serving instead of TorchServe
+* [ ] Check on potential closed book questioning variant
+* [ ] Check on potential prometheus integration
+* [ ] Check on potential tensorboard integration
