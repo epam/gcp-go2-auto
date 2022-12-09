@@ -17,22 +17,27 @@ COPY handler.py \
      requirements.txt \
      setup_config.json /home/model-server/
 
-RUN  mkdir -p model-store && \
-     torch-model-archiver \
+RUN  torch-model-archiver \
      --model-name "${MODEL_NAME}" \
      --version "${MODEL_VERSION}" \
      --model-file 'model.py' \
      --serialized-file "pytorch_model.bin" \
      --handler 'handler.py' \
      --extra-files "config.json,spiece.model,tokenizer.json,setup_config.json" \
-     --runtime 'python3' \
+     --runtime 'python' \
      --export-path "model-store" \
-     -r "requirements.txt"
+     --requirements-file "requirements.txt"
 
 FROM ${BASE_IMAGE}
+ARG MODEL_NAME=t5-small
+ARG MODEL_ALIAS=default
+
 # for pip install
 ENV PATH /home/model-server/.local/bin:$PATH
+ENV TS_CONFIG_FILE /home/model-server/config.properties
 
 COPY --from=1 /home/model-server/model-store/ /home/model-server/model-store
+COPY requirements.txt /home/model-server/
+RUN pip install -r requirements.txt --no-cache-dir --user
 
-VOLUME [ "/home/model-server/model-store/" ]
+CMD ["torchserve", "--foreground", "--model-store", "model-store", "--models", "${MODEL_ALIAS}=${MODEL_NAME}"]

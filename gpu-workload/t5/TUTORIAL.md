@@ -135,19 +135,20 @@ File Dockerfile.torch serves as a template for building the Docker image. It con
 The first stage is used to download the model artifacts from the Hugging Face repository. The second stage is used to package model with PyTorch Serving Archive tool ([torch-model-archiver](https://github.com/pytorch/serve/tree/master/model-archiver)). It will create a model archive (MAR) file that will be used by the inference server to load the model. The third stage is used to build the final image with PyTorch Serve that will be used to deploy the model to Kubernetes.
 
 ```bash
+cd model/
 export MODEL_VERSION='1.0'
 export MACHINE='gpu'
-cd model/
+export MODEL_IMAGE="gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
+export BASE_IMAGE="pytorch/torchserve:latest-$MACHINE"
 docker build \
-  --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
+  --build-arg BASE_IMAGE \
   --build-arg MODEL_NAME \
   --build-arg MODEL_VERSION \
-  -t "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE" \
-  -f 'Dockerfile.torch' .
-docker push  "gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE" 
+  --tag "$MODEL_IMAGE" model/
+docker push  "$MODEL_IMAGE" 
 ```
 
-> Depending on chosen model this operation can take some significant time
+> Depending on selected model this operation can take some significant time
 
 As you probably can see there are different base image for CPU and GPU. If you want to use CPU you then change `MACHINE` variable to `cpu`.
 
@@ -178,10 +179,9 @@ curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test
 1. Build and push application as a Docker image to GCR
 
 ```bash
-docker build \
-  -t "gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE" \
-  -f Dockerfile .
-docker push "gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
+export APP_IMAGE="gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
+docker build -t "$APP_IMAGE" .
+docker push "$APP_IMAGE"
 ```
 
 2. Deploy application to Kubernetes

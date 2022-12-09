@@ -24,3 +24,7 @@ indent_size = 2
 trim_trailing_whitespace = false
 indent_style = space
 indent_size = 2
+
+[*.properties]
+charset = ISO-8859-1
+indent_style = tab
