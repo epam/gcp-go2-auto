@@ -18,13 +18,9 @@ spec:
         key: webhookURL
       sendResolved: true
       title: |
-        {{/* Title of the Slack alert */}}
-        {{ define "slack.title" -}}
         [{{ .Status | toUpper -}}
         {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
         ] {{ .CommonLabels.alertname }}
-        {{- end }}
-        {{ template "slack.title" . }}
       text: |
         {{- if eq .CommonLabels.severity "critical" -}}
         *Severity:* `Critical` :red_circle:
