@@ -1,0 +1,24 @@
+operator.kubeletService:
+  enabled: false
+exporters:
+  node-exporter:
+    enabled: false
+  kube-state-metrics:
+    enabled: false
+kubelet:
+  enabled: false
+kubeApiServer:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+coreDns:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+alertmanager:
+  configSelector:
+    matchLabels:
+      alertmanagerConfig: slack

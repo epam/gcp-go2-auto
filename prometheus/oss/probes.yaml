@@ -9,8 +9,12 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - frontend:80
 ---
@@ -24,8 +28,12 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - userservice:8080/ready
 ---
@@ -39,8 +47,12 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - balancereader:8080/ready
 ---
@@ -54,8 +66,12 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - contacts:8080/ready
 ---
@@ -69,8 +85,12 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - ledgerwriter:8080/ready
 ---
@@ -84,7 +104,11 @@ spec:
     url: tutorial-kube-prometheus-blackbox-exporter:19115
     path: /probe
   module: http_2xx
+  interval: 60s
+  scrapeTimeout: 30s
   targets:
     staticConfig:
+      labels:
+        app: bank-of-anthos
       static:
         - transactionhistory:8080/ready
