@@ -169,7 +169,7 @@ kubectl apply -f kubernetes/serving-cpu.yaml
 To validate successful deployment run the following command:
 
 ```bash
-kubectl port-forward "svc/torchserve" 8080
+kubectl port-forward "svc/t5-inference" 8080
 # you may need different terminal window
 curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test sentence", "from": "en", "to": "es"}' "http://localhost:8080/predictions/$MODEL_NAME/$MODEL_VERSION"
 ```
@@ -186,10 +186,15 @@ docker push "$APP_IMAGE"
 
 2. Deploy application to Kubernetes
 
-Lorem ipsum... (TODO)
+Before you deploy application to Kubernetes you need to modify the `./kubernetes/app.yaml` file. Replace code below with the image you just pushed to GCR.
+
+```yaml
+  image: APP_IMAGE
+``
+
 
 ```bash
-# TODO
+kubectl apply -f "kubernetes/app.yaml" -f "kubernetes/app.yaml"
 ```
 
 3. Access deployed application with your browser
