@@ -16,36 +16,28 @@ spec:
     spec:
       containers:
         - name: main
-          image: gcr.io/GOOGLE_CLOUD_PROJECT/models/fastdash:MODEL_VERSION-$MACHINE
-          imagePullPolicy: IfNotPresent
+          image: eu.gcr.io/lustrous-baton-363720/apps/fastdash:latest
+          # image: APP_IMAGE
+          imagePullPolicy: Always
           env:
-          - name: PREDICTION_URL
-            value: "torchserve:8080/predictions/MODEL_NAME/MODEL_VERSION"
+          - name: MODEL_PREDICTION
+            value: "http://model-inference:8080/predictions/t5/1.0"
+          - name: MODEL_MANAGEMENT
+            value: "http://model-inference:8081/predictions/models"
           resources:
             limits:
               cpu: "2000m"
-              memory: 7Gi
-              ephemeral-storage: 10Gi
+              memory: 1Gi
             requests:
-              cpu: "2000m"
-              memory: 7Gi
-              ephemeral-storage: 10Gi
+              cpu: "600m"
+              memory: 64Mi
           ports:
-            - containerPort: 8080
+            - containerPort: 8050
               name: http
-            - containerPort: 8081
-              name: grpc
-            - containerPort: 8082
-              name: metrics
           readinessProbe:
             httpGet:
-              path: /ping
+              path: /
               port: http
-            initialDelaySeconds: 32
-            periodSeconds: 8
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 60
 
 ---
 apiVersion: v1
@@ -55,16 +47,11 @@ metadata:
   labels:
     app: fastdash
 spec:
-  type: ClusterIP
+  type: NodePort
+  # type: ClusterIP
   selector:
     app: fastdash
   ports:
-    - port: 8080
+    - port: 8050
       name: http
       targetPort: http
-    - port: 8081
-      name: grpc
-      targetPort: grpc
-    - port: 8082
-      name: metrics
-      targetPort: metrics
