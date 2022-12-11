@@ -1,14 +1,18 @@
-ARG FROM=pytorch/torchserve:latest-cpu
+ARG FROM=python:3.10-alpine
 FROM ${FROM}
+
+ARG PORT=8050
+ENV PORT=${PORT}
 
 WORKDIR /app
 
 COPY src/ /app
 
-RUN pip3 install --no-cache-dir 'fast-dash' 'gunicorn'
+RUN pip3 install --no-cache-dir \
+    'fast-dash' \
+    'gunicorn' \
+    'requests'
 
-ARG PORT=5000
-
-CMD exec gunicorn wsgi:server --bind ":${PORT}"
+CMD exec gunicorn wsgi:server --bind "0.0.0.0:${PORT}"
 
 EXPOSE ${PORT}

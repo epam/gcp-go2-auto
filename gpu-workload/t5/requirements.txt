@@ -1,5 +1,4 @@
 fast-dash
-gunicorn
 t5
 ts
 transformers
