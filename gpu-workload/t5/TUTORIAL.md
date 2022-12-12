@@ -92,7 +92,14 @@ gcloud container clusters get-credentials [CLUSTER_NAME] \
 
 ### Download pre-trained T5 model 
 
-1. Download pre-trained model from Hagging Face repository
+1. Clone this repository
+
+```bash
+git clone "https://github.com/epam/gcp-go2-auto.git"
+cd 'gcp-go2-auto/gpu-workload/t5'
+```
+
+2. Download pre-trained model from Hagging Face repository 
 
 The pre-trained model has been available in the [Hagging Face repository](https://huggingface.co/t5-small). You can download the model by running the following command:
 
