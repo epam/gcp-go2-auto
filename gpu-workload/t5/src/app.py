@@ -30,11 +30,11 @@ def text_to_text_function(text: str, from_lang=LANG_MAP, to_lang=LANG_MAP) -> st
   else:
     return "Oops, something went wrong!"
 
-app = FastDash(
+dash = FastDash(
   callback_fn=text_to_text_function,
   title="T5 model serving",
   github_url=GITHUB_URL,
 )
 
 if __name__ == "__main__":
-  app.run_server(debug=True, port=8050)
+  dash.run_server(debug=True, port=8050)

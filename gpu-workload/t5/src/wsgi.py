@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
 
-from dash import dash
+from app import dash
 
 server = dash.app.server

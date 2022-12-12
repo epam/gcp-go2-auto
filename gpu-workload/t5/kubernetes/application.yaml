@@ -18,7 +18,7 @@ spec:
         - name: main
           image: eu.gcr.io/lustrous-baton-363720/apps/fastdash:latest
           # image: APP_IMAGE
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
           - name: MODEL_PREDICTION
             value: "http://model-inference:8080/predictions/t5/1.0"

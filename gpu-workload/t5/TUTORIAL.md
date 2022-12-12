@@ -48,9 +48,9 @@ Other T5 model checkpoints you can find [here](https://huggingface.co/models?fil
 
 2. Enable API access for the project
   
-      * [Enable the Kubernetes Engine API](https://console.cloud.google.com/flows/enableapi?apiid=container.googleapis.com)
-      * [Enable the Container Registry API](https://console.cloud.google.com/flows/enableapi?apiid=containerregistry.googleapis.com)
-      * [Enable the Cloud Storage API](https://console.cloud.google.com/flows/enableapi?apiid=storage-api.googleapis.com)
+* [Enable the Kubernetes Engine API](https://console.cloud.google.com/flows/enableapi?apiid=container.googleapis.com)
+* [Enable the Container Registry API](https://console.cloud.google.com/flows/enableapi?apiid=containerregistry.googleapis.com)
+* [Enable the Cloud Storage API](https://console.cloud.google.com/flows/enableapi?apiid=storage-api.googleapis.com)
 
 3. Create GKE Autopilot Cluster: [Learn more](https://cloud.google.com/kubernetes-engine/docs/how-to/creating-an-autopilot-cluster)
 
@@ -104,12 +104,6 @@ git clone "huggingface.co/$MODEL_NAME" "models/$MODEL_NAME"
 In this tutorial we will use `t5-small` model. This model is the fastest to download. However you may want to use a larger model for better performance.
 
 > For larger model download may want to enable *git-lfs* to enable git cliet to download larger files. [Learn more](https://git-lfs.github.com/)
-
-2. Install dependencies
-
-```bash
-pip3 install -r requirements.txt
-```
 
 ## Prepare model for Serving
 
@@ -179,7 +173,7 @@ curl -v -X POST -H 'Content-Type: application/json' -d '{"text": "this is a test
 1. Build and push application as a Docker image to GCR
 
 ```bash
-export APP_IMAGE="gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:$MODEL_VERSION-$MACHINE"
+export APP_IMAGE="gcr.io/$GOOGLE_CLOUD_PROJECT/apps/fastdash:latest"
 docker build -t "$APP_IMAGE" .
 docker push "$APP_IMAGE"
 ```
@@ -189,17 +183,96 @@ docker push "$APP_IMAGE"
 Before you deploy application to Kubernetes you need to modify the `./kubernetes/app.yaml` file. Replace code below with the image you just pushed to GCR.
 
 ```yaml
-  image: APP_IMAGE
+image: APP_IMAGE
 ``
 
+```bash
+kubectl apply -f "kubernetes/app.yaml"
+```
+
+Wait until the application is deployed. Your kubectl command should return ready replicas 
 
 ```bash
-kubectl apply -f "kubernetes/app.yaml" -f "kubernetes/app.yaml"
+kubectl get -f 'kubernetes/application.yaml'
+
+# Result of the command
+# NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+# deployment.apps/fastdash   1/1     1            0           1m
+#
+#NAME               TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+#service/fastdash   NodePort   10.43.241.112   <none>        8050/TCP         1m
 ```
+
+You will see ready replicas when your application has been deployed. 
 
 3. Access deployed application with your browser
 
-Lorem ipsum... (TODO)
+Now to access the application run a `port-forward` command of the Kubernetes service to your local computer
+
+```bash
+kubectl port-forward service/fastdash 8050
+```
+
+With your browser open the following URL: `http://localhost:8050`
+You should be able to see a web page.
+
+![Screenshot](/assets/images/fastdash.png)
+
+As you can see this is a FastDash application. FastDash is a simple framework to create a web prototypes for macine learning models. You can find more information about FastDash [here](http://fastdash.app)
+
+You can enter the `TEXT` and select `FROM_LANG` and `TO_LANG` and click `Submit` button. The application will send the request to the deployed model and display the result.
+
+> Please consult available languages for your model. You can find the list of available languages [here](https://huggingface.co/transformers/model_doc/t5.html#t5forconditionalgeneration)
+
+4. OPTIONAL: Expose application with the Ingress
+
+Instead of creating a port-forward tunnel to your application you can expose it with the Ingress. 
+
+```bash
+kubectl get -f "kubernetes/ingress.yaml"
+```
+
+Capture ingress address and open it with your browser
+
+```bash
+kubectl get ingress
+# Result of the command
+# 
+# NAME       CLASS     HOSTS   ADDRESS         PORTS   AGE
+# fastdash             *       192.168.1.230   80      3m44s
+```
+
+### Conclusion
+
+In this tutorial you have successfully packaged T5 model and deployed it to GKE Autopilot Cluster. You have also deployed a FastDash application to access the model.
+
+GKE Autopilot is able to read resource requests from your deployments and automatically provision Kubernetes nodes with correct sizing. You can find more information about GKE Autopilot [here](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
+
+## Cleanup
+
+Before you delete the GKE Autopilot Cluster you need to delete the Kubernetes resources.
+
+```bash
+kubectl delete -f 'kubernetes'
+```
+
+Delete the GKE Autopilot Cluster
+
+```bash
+gcloud container clusters delete "$GKE_NAME" --region="$LOCATION" --quiet
+```
+
+Images stored in the GCR are not automatically deleted. These images has been stored in the `gcr.io/$GOOGLE_CLOUD_PROJECT` repository. You can delete them manually or you can use the [Cloud Build](https://cloud.google.com/build) to automatically delete the images.
+
+Alternatively you will notice GCR has been automatically created GS bucket. If you don't have any other images you can delete this bucket as well.
+
+```bash
+gsutil rm -r "gs://artifacts.$GOOGLE_CLOUD_PROJECT.appspot.com/"
+```
+
+## See also
+
+* About GKE Autopilot: [Learn more](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
 
 ## Troubleshooting
 
@@ -225,13 +298,11 @@ git lfs pull
 
 For troubleshooting GKE Autopilot, refer to [Troubleshooting Autopilot clusters](https://cloud.google.com/kubernetes-engine/docs/troubleshooting/troubleshooting-autopilot-clusters).
 
-## See also
-
-* About GKE Autopilot: [Learn more](https://cloud.google.com/kubernetes-engine/docs/concepts/autopilot-overview)
 
 ## TODOs
 
 * [x] Check newer versions of the model T5X and T5_v1.1
+* [ ] Check on potential performance metrics GPU vs CPU
 * [ ] Check on potential Triton serving instead of TorchServe
 * [ ] Check on potential Tensorflow serving instead of TorchServe
 * [ ] Check on potential closed book questioning variant
