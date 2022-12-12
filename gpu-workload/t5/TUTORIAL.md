@@ -223,7 +223,7 @@ kubectl port-forward service/fastdash 8050
 With your browser open the following URL: `http://localhost:8050`
 You should be able to see a web page.
 
-![Screenshot](/assets/images/fastdash.png)
+![Screenshot](./assets/images/fastdash.png)
 
 As you can see this is a FastDash application. FastDash is a simple framework to create a web prototypes for macine learning models. You can find more information about FastDash [here](http://fastdash.app)
 
