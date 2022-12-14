@@ -2,18 +2,18 @@
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: frontend-uptime
+  name: frontend-probe
   labels:
-    app.kubernetes.io/name: frontend-uptime
+    app.kubernetes.io/name: frontend-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
     params:
-      target: [frontend:8080]
+      target: [frontend:80]
       module: [http_2xx]
     timeout: 30s
     interval: 60s
@@ -21,13 +21,13 @@ spec:
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: userservice-uptime
+  name: userservice-probe
   labels:
-    app.kubernetes.io/name: userservice-uptime
+    app.kubernetes.io/name: userservice-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
@@ -40,13 +40,13 @@ spec:
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: balancereader-uptime
+  name: balancereader-probe
   labels:
-    app.kubernetes.io/name: balancereader-uptime
+    app.kubernetes.io/name: balancereader-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
@@ -59,13 +59,13 @@ spec:
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: contacts-uptime
+  name: contacts-probe
   labels:
-    app.kubernetes.io/name: contacts-uptime
+    app.kubernetes.io/name: contacts-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
@@ -78,13 +78,13 @@ spec:
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: ledgerwriter-uptime
+  name: ledgerwriter-probe
   labels:
-    app.kubernetes.io/name: ledgerwriter-uptime
+    app.kubernetes.io/name: ledgerwriter-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
@@ -97,13 +97,13 @@ spec:
 apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
-  name: transactionhistory-uptime
+  name: transactionhistory-probe
   labels:
-    app.kubernetes.io/name: transactionhistory-uptime
+    app.kubernetes.io/name: transactionhistory-probe
 spec:
   selector:
     matchLabels:
-      app: blackbox
+      app: blackbox-exporter
   endpoints:
   - port: metrics
     path: /probe
@@ -112,19 +112,3 @@ spec:
       module: [http_2xx]
     timeout: 30s
     interval: 60s
----
-apiVersion: monitoring.googleapis.com/v1
-kind: PodMonitoring
-metadata:
-  name: pgpool-name
-  labels:
-    app.kubernetes.io/name: pgpool-labels
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: pgpool
-      app.kubernetes.io/instance: accounts-db
-  endpoints:
-  - port: metrics
-    interval: 30s
----
