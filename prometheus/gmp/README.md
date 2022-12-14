@@ -2,17 +2,13 @@
 
 ## Create GKE autopilot
 
+>Note: only GKE with version 1.25 and later supports GMP
+
 ```bash
 gcloud container clusters create-auto prometheus \
   --region=us-central1 \
   --release-channel=rapid \
   --cluster-version=1.25.4-gke.1600
-```
-
-## Deploy GMP
-
-```bash
-gcloud beta container clusters update prometheus --enable-managed-prometheus --region=us-central1
 ```
 
 ## Deploy Bank of Anthos
