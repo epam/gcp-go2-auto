@@ -1,5 +1,13 @@
 # OSS Prometheus on GKE Autopilot
 
+## Create GKE autopilot
+
+```bash
+gcloud container clusters create-auto prometheus \
+  --region=us-central1 \
+  --release-channel=rapid
+```
+
 ## Deploy OSS Prometheus
 
 ```bash
@@ -41,10 +49,16 @@ kubectl apply -f bank-of-anthos/kubernetes-manifests
 
 ### Create a Kubernetes secret with Slack Webhook URL
 
-Replace `<slack_app_webhook_url>` with your value
+Replace `SLACK_WEBHOOK` with your value
 
 ```bash
-kubectl create secret generic alertmanager-slack-webhook --from-literal webhookURL=<slack_app_webhook_url>
+kubectl create secret generic alertmanager-slack-webhook --from-literal webhookURL=SLACK_WEBHOOK
+```
+
+Apply Alertmanager configuration
+
+```bash
+kubectl apply -f alertmanagerconfig.yaml
 ```
 
 ## Create Prometheus custom resources
@@ -52,7 +66,6 @@ kubectl create secret generic alertmanager-slack-webhook --from-literal webhookU
 ```bash
 kubectl apply -f probes.yaml
 kubectl apply -f rules.yaml
-kubectl apply -f alertmanagerconfig.yaml
 ```
 
 ## Testing alerts notifications

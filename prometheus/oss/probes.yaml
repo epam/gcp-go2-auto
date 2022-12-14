@@ -2,7 +2,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: Probe
 metadata:
-  name: frontend-uptime
+  name: frontend-probe
 spec:
   jobName: frontend
   prober:
