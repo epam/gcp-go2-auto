@@ -32,7 +32,7 @@ kubectl apply -f bank-of-anthos/kubernetes-manifests
 
 1. Join a Slack workspace, either by registering with your email or by using an invitation sent by a Workspace Admin.
 
->Note: If you are not an Admin for your Slack workspace, you may need approval from a Workspace Admin before your app is deployed to your workspace.
+   >Note: If you are not an Admin for your Slack workspace, you may need approval from a Workspace Admin before your app is deployed to your workspace.
 
 2. Sign in to Slack using your workspace name and your Slack account credentials.
 
