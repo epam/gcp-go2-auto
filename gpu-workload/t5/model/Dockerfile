@@ -8,6 +8,7 @@ RUN git clone "${MODEL_REPO}" /model
 
 FROM ${BASE_IMAGE}
 
+ARG MODEL_NAME
 ARG MODEL_VERSION=1.0
 
 COPY --from=0 /model/. /home/model-server/
@@ -17,7 +18,7 @@ COPY handler.py \
      setup_config.json /home/model-server/
 
 RUN  torch-model-archiver \
-     --model-name "t5" \
+     --model-name "${MODEL_NAME}" \
      --version "${MODEL_VERSION}" \
      --model-file 'model.py' \
      --serialized-file "pytorch_model.bin" \
