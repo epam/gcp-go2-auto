@@ -32,10 +32,12 @@ spec:
               nvidia.com/gpu: "1"
               cpu: "2000m"
               memory: 16Gi
+              ephemeral-storage: 1Gi
             requests:
               nvidia.com/gpu: "1"
-              cpu: "600m"
-              memory: 2Gi
+              cpu: "2000m"
+              memory: 16Gi
+              ephemeral-storage: 1Gi
           ports:
             - containerPort: 8080
               name: http
