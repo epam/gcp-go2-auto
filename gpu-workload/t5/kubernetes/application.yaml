@@ -21,16 +21,18 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
           - name: MODEL_PREDICTION
-            value: "http://model-inference:8080/predictions/t5/1.0"
+            value: "http://t5-inference:8080/predictions/t5-small/1.0"
           - name: MODEL_MANAGEMENT
-            value: "http://model-inference:8081/predictions/models"
+            value: "http://t5-inference:8081/predictions/models/t5-small"
           resources:
             limits:
-              cpu: "2000m"
-              memory: 1Gi
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 1Gi
             requests:
-              cpu: "600m"
-              memory: 64Mi
+              cpu: 250m
+              memory: 512Mi
+              ephemeral-storage: 1Gi
           ports:
             - containerPort: 8050
               name: http

@@ -24,20 +24,20 @@ spec:
         cloud.google.com/gke-accelerator: nvidia-tesla-t4
       containers:
         - name: main
-          image: eu.gcr.io/lustrous-baton-363720/models/t5-small:1.0-cpu
+          image: eu.gcr.io/lustrous-baton-363720/models/t5-small:1.0-gpu
           # image: MODEL_IMAGE
           imagePullPolicy: IfNotPresent
           resources:
             limits:
               nvidia.com/gpu: "1"
-              cpu: "2000m"
+              cpu: "3000m"
               memory: 16Gi
-              ephemeral-storage: 1Gi
+              ephemeral-storage: 10Gi
             requests:
               nvidia.com/gpu: "1"
-              cpu: "2000m"
+              cpu: "3000m"
               memory: 16Gi
-              ephemeral-storage: 1Gi
+              ephemeral-storage: 10Gi
           ports:
             - containerPort: 8080
               name: http
@@ -48,7 +48,7 @@ spec:
           args: ["torchserve", "--foreground", "--models", "all"]
           readinessProbe:
             httpGet:
-              path: /models/t5
+              path: /models/t5-small
               port: management
             initialDelaySeconds: 32
             periodSeconds: 8
@@ -57,7 +57,7 @@ spec:
             failureThreshold: 60
           livenessProbe:
             exec:
-              command: ["curl", "-f", "http://localhost:8081/models/t5"]
+              command: ["curl", "-f", "http://localhost:8081/models/t5-small"]
             initialDelaySeconds: 60
             periodSeconds: 5
 ---
