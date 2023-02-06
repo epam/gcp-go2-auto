@@ -25,8 +25,7 @@ export MODEL_VERSION='1.0'
 export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-cpu"
 docker build --tag "$MODEL_IMAGE" \
     --build-arg MODEL_NAME \
-    --build-arg MODEL_VERSION'\
-    .
+    --build-arg MODEL_VERSION .
 ```
 
 For GPU serving:
@@ -39,8 +38,7 @@ export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VE
 docker build --tag "$MODEL_IMAGE" \
     --build-arg BASE_IMAGE='pytorch/torchserve:latest-gpu' \
     --build-arg MODEL_NAME \
-    --build-arg MODEL_VERSION'\
-    .
+    --build-arg MODEL_VERSION .
 ```
 
 ## Run
