@@ -1,8 +1,0 @@
-fast-dash
-t5
-ts
-transformers
-torchserve
-torch-model-archiver
-torch-workflow-archiver
-# nvgpu

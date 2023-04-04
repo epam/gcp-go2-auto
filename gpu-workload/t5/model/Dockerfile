@@ -39,5 +39,4 @@ ENV TS_CONFIG_FILE /home/model-server/config.properties
 ENV TF_CPP_MIN_LOG_LEVEL 2
 
 COPY --from=1 /home/model-server/model-store/ /home/model-server/model-store
-COPY requirements.txt /home/model-server/
-RUN pip install -r requirements.txt --no-cache-dir --user
+COPY config.properties /home/model-server/

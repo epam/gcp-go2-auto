@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -20,18 +21,120 @@ spec:
         version: v1.0
         machine: cpu
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: topology.kubernetes.io/zone
+                operator: In
+                values:
+                - us-central1-b
+                - us-central1-c
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+        runAsGroup: 1000
+      initContainers:
+      - name: get-model
+        image: alpine/git
+        command: ["/bin/sh", "-c", "/home/model-server/checkout.sh"]
+        env:
+        - name: REMOTE_REPO
+          value: https://huggingface.co/t5-small
+        - name: REPO_DIR
+          value: /home/t5/model
+        volumeMounts:
+        - name: prepare-scripts
+          mountPath: /home/model-server
+        - name: t5
+          mountPath: /home/t5/model
+          subPath: model
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
+      - name: get-model-handler
+        image: alpine/git
+        command: ["/bin/sh", "-c", "/home/model-server/checkout.sh"]
+        env:
+        - name: REMOTE_REPO
+          value: https://github.com/epam/gcp-go2-auto.git
+        - name: REPO_DIR
+          value: /home/t5/handler
+        volumeMounts:
+        - name: prepare-scripts
+          mountPath: /home/model-server
+        - name: t5
+          mountPath: /home/t5/handler
+          subPath: handler
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
+      - name: mar
+        image: pytorch/torchserve:latest-cpu
+        command: ["/bin/sh", "-c", "/home/t5/scripts/mar.sh"]
+        env:
+        - name: MODEL_NAME
+          value: t5-small
+        - name: MODEL_VERSION
+          value: "1.0"
+        volumeMounts:
+        - name: t5
+          mountPath: /home/t5/model
+          subPath: model
+        - name: t5
+          mountPath: /home/t5/handler
+          subPath: handler
+        - name: t5
+          mountPath: /home/model-server/model-store
+          subPath: model-store
+        - name: prepare-scripts
+          mountPath: /home/t5/scripts
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
+          limits:
+            cpu: 250m
+            memory: 512Mi
+            ephemeral-storage: 10Gi
       containers:
-        - name: main
-          image: eu.gcr.io/lustrous-baton-363720/models/t5-small:1.0-cpu
-          # image: MODEL_IMAGE
+        - name: inference
+          image: pytorch/torchserve:latest-cpu
           imagePullPolicy: IfNotPresent
+          args: ["/bin/sh", "-c", "/home/torchserve/start-torchserve.sh"]
+          env:
+          - name: TS_CONFIG_FILE
+            value: /home/torchserve/config.properties
+          volumeMounts:
+          - name: t5
+            mountPath: /home/model-server/model-store/
+            subPath: model-store
+          - name: t5
+            mountPath: /home/t5/handler
+            subPath: handler
+          - name: torchserve-files
+            mountPath: /home/torchserve
           resources:
             limits:
-              cpu: "2500m"
+              cpu: "3000m"
               memory: 16Gi
               ephemeral-storage: 10Gi
             requests:
-              cpu: "2500m"
+              cpu: "3000m"
               memory: 16Gi
               ephemeral-storage: 10Gi
           ports:
@@ -41,21 +144,30 @@ spec:
               name: management
             - containerPort: 8082
               name: metrics
-          args: ["torchserve", "--foreground", "--models", "all"]
           readinessProbe:
+            httpGet:
+              path: /ping
+              port: http
+            initialDelaySeconds: 120
+            failureThreshold: 10
+          livenessProbe:
             httpGet:
               path: /models/t5-small
               port: management
-            initialDelaySeconds: 32
-            periodSeconds: 8
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 60
-          livenessProbe:
-            exec:
-              command: ["curl", "-f", "http://localhost:8081/models/t5-small"]
-            initialDelaySeconds: 60
+            initialDelaySeconds: 150
             periodSeconds: 5
+      volumes:
+      - name: t5
+        persistentVolumeClaim:
+          claimName: t5
+      - name: prepare-scripts
+        configMap:
+          name: prepare-scripts
+          defaultMode: 0777
+      - name: torchserve-files
+        configMap:
+          name: torchserve-files
+          defaultMode: 0777
 ---
 apiVersion: v1
 kind: Service
@@ -66,7 +178,7 @@ metadata:
     version: v1.0
     machine: cpu
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     model: t5
     version: v1.0

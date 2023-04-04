@@ -20,10 +20,10 @@ spec:
           # image: APP_IMAGE
           imagePullPolicy: IfNotPresent
           env:
-          - name: MODEL_PREDICTION
-            value: "http://t5-inference:8080/predictions/t5-small/1.0"
-          - name: MODEL_MANAGEMENT
-            value: "http://t5-inference:8081/predictions/models/t5-small"
+            - name: MODEL_PREDICTION
+              value: "http://t5-inference:8080/predictions/t5-small/1.0"
+            - name: MODEL_MANAGEMENT
+              value: "http://t5-inference:8081/predictions/models/t5-small"
           resources:
             limits:
               cpu: 250m
@@ -40,7 +40,6 @@ spec:
             httpGet:
               path: /
               port: http
-
 ---
 apiVersion: v1
 kind: Service
@@ -50,7 +49,6 @@ metadata:
     app: fastdash
 spec:
   type: NodePort
-  # type: ClusterIP
   selector:
     app: fastdash
   ports:

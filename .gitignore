@@ -1,7 +1,3 @@
 *.code-workspace
-t5-large
-t5-small
 .vscode
 __pycache__
-
-*.mar

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 MANAGEMENT_URL = environ.get('MODEL_MANAGEMENT', 'http://localhost:8081/models/t5-small')
 PREDICTION_URL = environ.get('MODEL_PREDICTION', 'http://localhost:8080/predictions/t5-small/1.0')
-GITHUB_URL = environ.get('GITHUB_URL', 'https://github.com/epam/gcp-go2-auto')
+GITHUB_URL = environ.get('GITHUB_URL', 'https://github.com/epam/gcp-go2-auto/tree/main/gpu-workload/t5')
 DEFAULT_MODELS = ["t5"]
 LANG_MAP = {
   "en": "English",

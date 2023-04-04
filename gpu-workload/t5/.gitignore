@@ -1,5 +1,6 @@
-model/t5-*/
-/model-store
+.venv
+models
+model-store
 !model-store/.gitkeep
-/logs
+logs
 *.mar

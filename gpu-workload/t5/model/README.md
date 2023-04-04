@@ -15,34 +15,43 @@ You can configure the build process by setting docker build arguments:
 * `BASE_IMAGE` - base image to use for the final container (default: `pytorch/torchserve:latest-cpu`)
 * `MODEL_NAME` - name of the model to download from huggingface (default: `t5-small`)
 * `MODEL_REPO` - repository of the model to download with git (default: `https://huggingface.co/${MODEL_NAME}`)
-* `MODEL_VERSION` - version of the model to download from huggingface (default: `1`)
+* `MODEL_VERSION` - version of the model to download from huggingface (default: `1.0`)
 
 For CPU serving:
 
 ```bash
-export MODEL_NAME='t5-small'
-export MODEL_VERSION='1.0'
-export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-cpu"
-docker build --tag "$MODEL_IMAGE" \
-    --build-arg MODEL_NAME \
-    --build-arg MODEL_VERSION .
+export MACHINE="cpu"
 ```
 
 For GPU serving:
 
 ```bash
-export MODEL_NAME='t5-small'
-export MODEL_VERSION='1.0'
-export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-gpu"
+export MACHINE="gpu"
+```
 
-docker build --tag "$MODEL_IMAGE" \
-    --build-arg BASE_IMAGE='pytorch/torchserve:latest-gpu' \
-    --build-arg MODEL_NAME \
-    --build-arg MODEL_VERSION .
+Build docker image:
+
+```bash
+export MODEL_NAME="t5-small"
+export MODEL_VERSION="1.0"
+export MACHINE="cpu"
+export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
+docker buildx build \
+  --tag "$MODEL_IMAGE" \
+  --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
+  --build-arg MODEL_NAME \
+  --build-arg MODEL_VERSION .
+```
+
+## Storing the Client App
+
+```bash
+gcloud auth configure-docker eu.gcr.io --quiet
+docker push "$MODEL_IMAGE"
 ```
 
 ## Run
 
 ```bash
-docker run --rm -it -p '8080:8080' "$MODEL_IMAGE" torchserve --foreground --models "all"
+docker run --rm -it -p "8080:8080" -p "8081:8081" "$MODEL_IMAGE" torchserve --start --foreground
 ```
