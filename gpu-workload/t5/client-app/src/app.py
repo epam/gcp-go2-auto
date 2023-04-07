@@ -20,7 +20,7 @@ LANG_MAP = {
 
 logger.info(f"Model prediction: {PREDICTION_URL}")
 
-def text_to_text_function(text: str, from_lang=LANG_MAP, to_lang=LANG_MAP) -> str:
+def text_to_text_function(text: str = "Hello World", from_lang=LANG_MAP["en"], to_lang=LANG_MAP["de"]) -> str:
   headers = {"Content-Type": "application/json"}
   payload = {"text": text, "from": from_lang, "to": to_lang}
   resp = requests.post(PREDICTION_URL, json=payload, headers=headers)

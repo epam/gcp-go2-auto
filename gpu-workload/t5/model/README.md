@@ -17,6 +17,8 @@ You can configure the build process by setting docker build arguments:
 * `MODEL_REPO` - repository of the model to download with git (default: `https://huggingface.co/${MODEL_NAME}`)
 * `MODEL_VERSION` - version of the model to download from huggingface (default: `1.0`)
 
+### Locally
+
 For CPU serving:
 
 ```bash
@@ -41,13 +43,37 @@ docker buildx build \
   --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
   --build-arg MODEL_NAME \
   --build-arg MODEL_VERSION .
+gcloud auth configure-docker gcr.io --quiet
+docker push "$MODEL_IMAGE"
 ```
 
-## Storing the Client App
+### GCP Cloud Build
+
+Available substitutions:
+
+* `_MACHINE` - type of base image - `cpu` or `gpu` (default: `cpu`)
+* `_BASE_IMAGE` - base image to use for the final container (default: `pytorch/torchserve:latest-${_MACHINE}`)
+* `_MODEL_NAME` - name of the model to download from huggingface (default: `t5-small`)
+* `_MODEL_REPO` - repository of the model to download with git (default: `https://huggingface.co/${_MODEL_NAME}`)
+* `_MODEL_VERSION` - version of the model to download from huggingface (default: `1.0`)
+* `_MODEL_IMAGE` - name of image (default: `gcr.io/${PROJECT_ID}/models/${_MODEL_NAME}:${_MODEL_VERSION}-${_MACHINE}`)
+
+For CPU serving:
 
 ```bash
-gcloud auth configure-docker eu.gcr.io --quiet
-docker push "$MODEL_IMAGE"
+gcloud builds submit . \
+  --region=us-central1 \
+  --config=cloudbuild.yaml \
+  --substitutions=_MACHINE=cpu
+```
+
+For GPU serving:
+
+```bash
+gcloud builds submit . \
+  --region=us-central1 \
+  --config=cloudbuild.yaml \
+  --substitutions=_MACHINE=gpu
 ```
 
 ## Run

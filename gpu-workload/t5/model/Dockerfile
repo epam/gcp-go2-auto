@@ -4,12 +4,17 @@ FROM alpine/git
 
 ARG MODEL_NAME=t5-small
 ARG MODEL_REPO=https://huggingface.co/${MODEL_NAME}
+ENV MODEL_NAME=${MODEL_NAME}
+ENV MODEL_VERSION=${MODEL_VERSION}
+
 RUN git clone "${MODEL_REPO}" /model
 
 FROM ${BASE_IMAGE}
 
-ARG MODEL_NAME
+ARG MODEL_NAME=t5-small
 ARG MODEL_VERSION=1.0
+ENV MODEL_NAME=${MODEL_NAME}
+ENV MODEL_VERSION=${MODEL_VERSION}
 
 COPY --from=0 /model/. /home/model-server/
 COPY handler.py \
@@ -18,19 +23,18 @@ COPY handler.py \
      setup_config.json /home/model-server/
 
 RUN  torch-model-archiver \
-     --model-name "${MODEL_NAME}" \
-     --version "${MODEL_VERSION}" \
-     --model-file 'model.py' \
-     --serialized-file "pytorch_model.bin" \
-     --handler 'handler.py' \
-     --extra-files "config.json,spiece.model,tokenizer.json,setup_config.json" \
-     --runtime 'python' \
-     --export-path "model-store" \
-     --requirements-file "requirements.txt"
+     --model-name="${MODEL_NAME}" \
+     --version="${MODEL_VERSION}" \
+     --model-file="model.py" \
+     --serialized-file="pytorch_model.bin" \
+     --handler="handler.py" \
+     --extra-files="config.json,spiece.model,tokenizer.json,setup_config.json" \
+     --runtime="python" \
+     --export-path="model-store" \
+     --requirements-file="requirements.txt"
 
 FROM ${BASE_IMAGE}
 
-# for pip install
 ENV PATH /home/model-server/.local/bin:$PATH
 ENV TS_CONFIG_FILE /home/model-server/config.properties
 # CPU inference will trhow a warning cuda warning (not error)

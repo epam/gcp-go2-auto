@@ -32,3 +32,9 @@ pip install -r requirements.txt
 ```bash
 docker run -it --rm -p "8050:8050" $IMAGE
 ```
+
+### GCP Cloud Build
+
+```shell
+gcloud builds submit --region=us-central1 --config cloudbuild.yaml .
+```

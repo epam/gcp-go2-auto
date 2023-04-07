@@ -9,7 +9,7 @@ export GOOGLE_CLOUD_PROJECT=$(gcloud config get project)
 export MODEL_NAME="t5-small"
 export MODEL_VERSION="1.0"
 export MACHINE="cpu"
-export MODEL_IMAGE="eu.gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
+export MODEL_IMAGE="gcr.io/$GOOGLE_CLOUD_PROJECT/models/$MODEL_NAME:$MODEL_VERSION-$MACHINE"
 docker buildx build \
   --build-arg BASE_IMAGE="pytorch/torchserve:latest-$MACHINE" \
   --build-arg MODEL_NAME \

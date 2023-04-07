@@ -1,0 +1,28 @@
+options:
+  dynamic_substitutions: true
+steps:
+- name: gcr.io/cloud-builders/docker
+  env:
+  - BASE_IMAGE=${_BASE_IMAGE}
+  - MODEL_NAME=${_MODEL_NAME}
+  - MODEL_VERSION=${_MODEL_VERSION}
+  args:
+  - buildx
+  - build
+  - --tag
+  - ${_MODEL_IMAGE}
+  - --build-arg
+  - BASE_IMAGE
+  - --build-arg
+  - MODEL_NAME
+  - --build-arg
+  - MODEL_VERSION
+  - "."
+substitutions:
+  _MODEL_NAME: t5-small
+  _MODEL_VERSION: "1.0"
+  _MACHINE: cpu
+  _MODEL_IMAGE: gcr.io/${PROJECT_ID}/models/${_MODEL_NAME}:${_MODEL_VERSION}-${_MACHINE}
+  _BASE_IMAGE: pytorch/torchserve:latest-${_MACHINE}
+images:
+- ${_MODEL_IMAGE}
