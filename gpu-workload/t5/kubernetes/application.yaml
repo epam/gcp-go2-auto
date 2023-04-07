@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: main
-          image: eu.gcr.io/lustrous-baton-363720/apps/fastdash:latest
+          image: gcr.io/lustrous-baton-363720/apps/fastdash:latest
           # image: APP_IMAGE
           imagePullPolicy: IfNotPresent
           env:
@@ -48,10 +48,10 @@ metadata:
   labels:
     app: fastdash
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: fastdash
   ports:
-    - port: 8050
+    - port: 80
       name: http
       targetPort: http
