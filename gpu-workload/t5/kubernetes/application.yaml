@@ -48,10 +48,10 @@ metadata:
   labels:
     app: fastdash
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: fastdash
   ports:
-    - port: 80
+    - port: 8050
       name: http
       targetPort: http
