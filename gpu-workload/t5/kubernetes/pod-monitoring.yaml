@@ -1,0 +1,15 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: torchserve
+  labels:
+    app.kubernetes.io/name: torchserve
+spec:
+  selector:
+    matchLabels:
+      model: t5
+  endpoints:
+  - port: metrics
+    path: /metrics
+    timeout: 30s
+    interval: 60s

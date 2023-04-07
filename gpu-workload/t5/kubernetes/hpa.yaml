@@ -1,0 +1,19 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: t5-inference
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: t5-inference
+  minReplicas: 1
+  maxReplicas: 23
+  metrics:
+  - type: Pods
+    pods:
+      metric:
+        name: prometheus.googleapis.com|ts_queue_latency_microseconds|counter
+      target:
+        type: AverageValue
+        averageValue: "7000000"
