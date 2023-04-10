@@ -8,7 +8,7 @@ spec:
     kind: Deployment
     name: t5-inference
   minReplicas: 1
-  maxReplicas: 23
+  maxReplicas: 5
   metrics:
   - type: Pods
     pods:
