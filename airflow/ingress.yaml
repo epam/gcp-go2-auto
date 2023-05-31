@@ -1,0 +1,19 @@
+---
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: airflow
+  namespace: airflow
+spec:
+  redirectToHttps:
+    enabled: true
+    responseCodeName: MOVED_PERMANENTLY_DEFAULT
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: airflow
+  namespace: airflow
+spec:
+  domains:
+    - airflow.BASE_DOMAIN

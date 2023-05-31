@@ -1,0 +1,249 @@
+ingress:
+  web:
+    enabled: true
+    annotations:
+      networking.gke.io/managed-certificates: "airflow"
+      networking.gke.io/v1beta1.FrontendConfig: airflow
+      kubernetes.io/ingress.global-static-ip-name: airflow
+      kubernetes.io/ingress.class: gce
+    path: "/"
+    pathType: "Prefix"
+    hosts:
+      - airflow.BASE_DOMAIN
+
+# Airflow executor
+executor: "KubernetesExecutor"
+
+# Extra envFrom 'items' that will be added to the definition of airflow containers
+# A string is expected (can be templated).
+extraEnvFrom: |
+  - secretRef:
+      name: '{{ .Release.Name }}-google-oauth-creds'
+
+# Airflow database & redis config
+data:
+  metadataConnection:
+    user: airflow-metadata
+    protocol: postgresql
+    host: airflow-metadata-db
+    port: 5432
+    db: airflow-metadata
+    sslmode: disable
+
+# Airflow Worker Config
+workers:
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: standard-rwo
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
+  nodeSelector:
+    group: "workers"
+
+  tolerations:
+    - key: group
+      operator: Equal
+      value: "workers"
+      effect: NoSchedule
+
+# Airflow scheduler settings
+scheduler:
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Gi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Gi
+      ephemeral-storage: 1Gi
+
+  logGroomerSidecar:
+    enabled: true
+    resources:
+      limits:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi
+
+# Airflow database migration job settings
+migrateDatabaseJob:
+  enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
+# Airflow webserver settings
+webserver:
+  livenessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 30
+    failureThreshold: 5
+    periodSeconds: 60
+
+  readinessProbe:
+    initialDelaySeconds: 120
+    timeoutSeconds: 30
+    failureThreshold: 5
+    periodSeconds: 60
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1.5Gi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 1.5Gi
+      ephemeral-storage: 1Gi
+
+  defaultUser:
+    enabled: false
+
+  webserverConfig: |
+    import os
+    from flask_appbuilder.security.manager import AUTH_OAUTH
+    from airflow.www.security import AirflowSecurityManager
+
+    AUTH_TYPE = AUTH_OAUTH
+    SECURITY_MANAGER_CLASS = AirflowSecurityManager
+
+    AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
+    AUTH_USER_REGISTRATION_ROLE = "Admin"  # this role will be given in addition to any AUTH_ROLES_MAPPING
+
+    OAUTH_PROVIDERS = [
+        {
+            "name": "google",
+            "icon": "fa-google",
+            "token_key": "access_token",
+            "remote_app": {
+                "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
+                "client_secret": os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"),
+                "api_base_url": "https://www.googleapis.com/oauth2/v2/",
+                "client_kwargs": {"scope": "email profile"},
+                "request_token_url": None,
+                "access_token_url": "https://oauth2.googleapis.com/token",
+                "authorize_url": "https://accounts.google.com/o/oauth2/auth",
+                "jwks_uri": "https://www.googleapis.com/oauth2/v3/certs",
+            },
+        },
+    ]
+
+    AUTH_ROLES_SYNC_AT_LOGIN = True
+    PERMANENT_SESSION_LIFETIME = 1800
+
+# Airflow Triggerer Config
+triggerer:
+  enabled: true
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Gi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Gi
+      ephemeral-storage: 1Gi
+
+  logGroomerSidecar:
+    enabled: true
+
+    resources:
+      limits:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi
+
+# StatsD settings
+statsd:
+  enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
+# Configuration for the redis provisioned by the chart
+redis:
+  enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
+# This runs as a CronJob to cleanup old pods.
+cleanup:
+  enabled: true
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+      ephemeral-storage: 1Gi
+
+postgresql:
+  enabled: false
+
+dags:
+  gitSync:
+    enabled: true
+
+    repo: https://github.com/apache/airflow.git
+    branch: main
+    subPath: "tests/dags"
+    wait: 5
+
+    resources:
+      limits:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+        ephemeral-storage: 1Gi

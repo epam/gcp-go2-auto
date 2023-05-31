@@ -1,0 +1,16 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: airflow-statd-metrics
+  namespace: airflow
+  labels:
+    app.kubernetes.io/name: airflow-statd-metrics
+spec:
+  selector:
+    matchLabels:
+      component: statsd
+  endpoints:
+  - port: 9102
+    path: /metrics
+    timeout: 30s
+    interval: 60s
