@@ -146,6 +146,7 @@ helm upgrade --install "airflow" "apache-airflow/airflow" \
 helm uninstall airflow --namespace airflow
 kubectl delete -f cloud-sql-proxy.yaml
 kubectl delete -f pvc.yaml
+kubectl delete -f ingress.yaml
 gcloud dns record-sets delete "airflow.BASE_DOMAIN" \
   --type="A" \
   --zone="airflow" \
@@ -159,7 +160,6 @@ gcloud container clusters delete airflow \
   --region="REGION" \
   --quiet
 gcloud storage rm -r gs://PROJECT_ID-airflow-dags --quiet
-gcloud storage buckets delete gs://PROJECT_ID-airflow-dags --quiet
 gcloud iam service-accounts delete airflow-dags-reader@PROJECT_ID.iam.gserviceaccount.com --quiet
 gcloud iam service-accounts delete airflow-metadata-db@PROJECT_ID.iam.gserviceaccount.com --quiet
 gcloud services vpc-peerings delete \

@@ -32,6 +32,13 @@ data:
 
 # Airflow Worker Config
 workers:
+  serviceAccount:
+    create: false
+    name: airflow
+
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+
   persistence:
     enabled: true
     size: 10Gi
@@ -58,14 +65,21 @@ workers:
 
 # Airflow scheduler settings
 scheduler:
+  serviceAccount:
+    create: false
+    name: airflow
+
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+
   resources:
     limits:
       cpu: 250m
-      memory: 512Gi
+      memory: 512Mi
       ephemeral-storage: 1Gi
     requests:
       cpu: 250m
-      memory: 512Gi
+      memory: 512Mi
       ephemeral-storage: 1Gi
 
   logGroomerSidecar:
@@ -96,6 +110,13 @@ migrateDatabaseJob:
 
 # Airflow webserver settings
 webserver:
+  serviceAccount:
+    create: false
+    name: airflow
+
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+
   livenessProbe:
     initialDelaySeconds: 120
     timeoutSeconds: 30
@@ -157,6 +178,13 @@ webserver:
 triggerer:
   enabled: true
 
+  serviceAccount:
+    create: false
+    name: airflow
+
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+
   persistence:
     enabled: true
     size: 10Gi
@@ -164,11 +192,11 @@ triggerer:
   resources:
     limits:
       cpu: 250m
-      memory: 512Gi
+      memory: 512Mi
       ephemeral-storage: 1Gi
     requests:
       cpu: 250m
-      memory: 512Gi
+      memory: 512Mi
       ephemeral-storage: 1Gi
 
   logGroomerSidecar:
@@ -230,20 +258,25 @@ postgresql:
   enabled: false
 
 dags:
-  gitSync:
+  # gitSync:
+  #   enabled: true
+
+  #   repo: https://github.com/apache/airflow.git
+  #   branch: main
+  #   subPath: "tests/dags"
+  #   wait: 5
+
+  #   resources:
+  #     limits:
+  #       cpu: 250m
+  #       memory: 512Mi
+  #       ephemeral-storage: 1Gi
+  #     requests:
+  #       cpu: 250m
+  #       memory: 512Mi
+  #       ephemeral-storage: 1Gi
+
+  persistence:
     enabled: true
+    existingClaim: "airflow-dags-gcs"
 
-    repo: https://github.com/apache/airflow.git
-    branch: main
-    subPath: "tests/dags"
-    wait: 5
-
-    resources:
-      limits:
-        cpu: 250m
-        memory: 512Mi
-        ephemeral-storage: 1Gi
-      requests:
-        cpu: 250m
-        memory: 512Mi
-        ephemeral-storage: 1Gi
