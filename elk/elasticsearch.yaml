@@ -1,0 +1,117 @@
+# https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-virtual-memory.html
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: max-map-count-setter
+  namespace: elastic-system
+  labels:
+    k8s-app: max-map-count-setter
+spec:
+  selector:
+    matchLabels:
+      name: max-map-count-setter
+  template:
+    metadata:
+      labels:
+        name: max-map-count-setter
+    spec:
+      nodeSelector:
+        cloud.google.com/compute-class: "Balanced"
+      initContainers:
+        - name: max-map-count-setter
+          image: docker.io/bash:5.2.15
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+              ephemeral-storage: 10Mi
+            limits:
+              cpu: 10m
+              memory: 32Mi
+              ephemeral-storage: 10Mi
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ["/usr/local/bin/bash", "-e", "-c", "echo 262144 > /proc/sys/vm/max_map_count"]
+      containers:
+        - name: sleep
+          image: docker.io/bash:5.2.15
+          command: ["sleep", "infinity"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+              ephemeral-storage: 16Mi
+            limits:
+              cpu: 10m
+              memory: 16Mi
+              ephemeral-storage: 16Mi
+---
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: elasticsearch
+  namespace: elastic-system
+spec:
+  version: 8.8.0
+  volumeClaimDeletePolicy: DeleteOnScaledownOnly
+  podDisruptionBudget:
+    spec:
+      minAvailable: 2
+      selector:
+        matchLabels:
+          elasticsearch.k8s.elastic.co/cluster-name: elasticsearch
+  nodeSets:
+    - name: default
+      config:
+        node.roles: ["master", "data", "ingest", "ml", "remote_cluster_client"]
+      podTemplate:
+        metadata:
+          labels:
+            app.kubernetes.io/name: elasticsearch
+            app.kubernetes.io/version: "8.8.0"
+            app.kubernetes.io/component: "elasticsearch"
+            app.kubernetes.io/part-of: "elk"
+        spec:
+          nodeSelector:
+            cloud.google.com/compute-class: "Balanced"
+          initContainers:
+            - name: max-map-count-check
+              command:
+                - sh
+                - -c
+                - while true; do mmc=$(cat /proc/sys/vm/max_map_count); if test ${mmc} -eq 262144; then exit 0; fi; sleep 1; done
+              resources:
+                requests:
+                  memory: 16Mi
+                  cpu: 10m
+                  ephemeral-storage: 16Mi
+                limits:
+                  memory: 16Mi
+                  cpu: 10m
+                  ephemeral-storage: 16Mi
+          containers:
+            - name: elasticsearch
+              resources:
+                requests:
+                  memory: 4Gi
+                  cpu: 1000m
+                  ephemeral-storage: 1Gi
+                limits:
+                  memory: 4Gi
+                  cpu: 1000m
+                  ephemeral-storage: 1Gi
+              env:
+                - name: ES_JAVA_OPTS
+                  value: "-Xms2g -Xmx2g"
+      count: 3
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+            storageClassName: standard-rwo
