@@ -1,0 +1,29 @@
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: istiod
+  namespace: istio-system
+spec:
+  selector:
+    matchLabels:
+      app: istiod
+  endpoints:
+  - port: 15014
+    path: /metrics
+    timeout: 30s
+    interval: 60s
+---
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: bank-of-anthos-envoy-proxies
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      application: bank-of-anthos
+  endpoints:
+  - port: 15020
+    path: /metrics
+    timeout: 30s
+    interval: 60s

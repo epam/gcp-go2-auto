@@ -1,0 +1,24 @@
+apiVersion: kiali.io/v1alpha1
+kind: Kiali
+metadata:
+  name: kiali
+  namespace: istio-system
+spec:
+  deployment:
+    namespace: istio-system
+  auth:
+    strategy: anonymous
+  external_services:
+    custom_dashboards:
+      prometheus:
+        url: "http://frontend.monitoring:9090/"
+        auth:
+          type: none
+    prometheus:
+      url: "http://frontend.monitoring:9090/"
+      auth:
+        type: none
+    tracing:
+      enabled: false
+    grafana:
+      enabled: false
